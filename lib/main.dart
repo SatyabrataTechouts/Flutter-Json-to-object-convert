@@ -1,4 +1,6 @@
 import 'dart:convert';
+// import 'dart:ffi';
+// import 'dart:html';
 
 import 'package:app/user_details.dart';
 import 'package:flutter/material.dart';
@@ -36,42 +38,64 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<UserModel> pokemonData = [];
   Future<void> readJson() async {
     final String response = await rootBundle.loadString('Assets/Pokemon.json');
     final data = await json.decode(response) as List;
-    final mappedData = data.map((e) => UserModel.fromJson(e)).toList();
-    print(data.toString());
+    List<UserModel> mappedData =
+        data.map((e) => UserModel.fromJson(e)).toList();
+    // print(data.toString());
+    // print('${mappedData}===');
+    setState(() {
+      pokemonData = mappedData;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              // decoration: BoxDecoration(color: Colors.amber),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => {readJson()},
+                    child: const Text('Convert'),
+                  ),
+                ],
+              ),
+            ),
+            pokemonData.isEmpty
+                ? Container()
+                : Container(
+                    height: 500,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: pokemonData.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: (Text(pokemonData[index].name?.english ?? '')),
+                        );
+                      },
+                    ),
+                  ),
+          ],
         ),
-        body: Center(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                // decoration: BoxDecoration(color: Colors.amber),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () => {readJson()},
-                      child: const Text('Convert'),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }
